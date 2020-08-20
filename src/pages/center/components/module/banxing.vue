@@ -114,13 +114,14 @@ export default {
      */
     A_showAdd_1(index) {
       const { listObj, active } = this
-      const { sample_confirm_id = 'null', make_sample_id } = listObj[active][index]
+      const { sample_confirm_id = 'null', make_sample_id, item_id } = listObj[active][index]
       const host = window.location.origin + '/nova/'
+      console.log(item_id, host, sample_confirm_id, make_sample_id)
       /* 发起请求 */
       // eslint-disable-next-line
       ui("open", {
         title: '款式打样信息',
-        url: `${host}pages/makesamplerecord/makesamplerecordlist.jsp?type=dygj&sample_confirm_id=${sample_confirm_id}&make_sample_id=${make_sample_id}`,
+        url: `${host}pages/makesamplerecord/makesamplerecordlist.jsp?type=dygj&sample_confirm_id=${sample_confirm_id}&make_sample_id=${make_sample_id}&item_id=${item_id}`,
         onClose: function () {}
       })
     },
@@ -129,13 +130,13 @@ export default {
      */
     A_showAdd_2(index) {
       const { listObj, active } = this
-      const { sample_confirm_id = 'null', make_sample_id } = listObj[active][index]
+      const { sample_confirm_id = 'null', make_sample_id, item_id } = listObj[active][index]
       const host = window.location.origin + '/nova/'
       /* 发起请求 */
       // eslint-disable-next-line
       ui("open", {
         title: '款式过款记录',
-        url: `${host}pages/makesamplerecord/makesamplerecordlist.jsp?type=gkjl&sample_confirm_id=${sample_confirm_id}&make_sample_id=${make_sample_id}`,
+        url: `${host}pages/makesamplerecord/makesamplerecordlist.jsp?type=gkjl&sample_confirm_id=${sample_confirm_id}&make_sample_id=${make_sample_id}&item_id=${item_id}`,
         onClose: function () {}
       })
     },
