@@ -1,13 +1,19 @@
 
 <!-- 顶部 tab -->
 <template>
-  <el-radio-group class="topTab" size="small" v-model="active2" @change="change">
-    <el-radio-button size="mini" v-for="(item, index) in list" :key="'list_' + index" :label="index">
-      <span>{{index}}</span>
-      <!-- <span class="asd">999</span> -->
-      <span class="point" :class="active2 === index ? 'active' : 'none'">{{item}}</span>
-    </el-radio-button>
-  </el-radio-group>
+  <div class="tobTabBox">
+
+    <el-radio-group class="topTab" size="small" v-model="active2" @change="change">
+      <el-radio-button size="mini" v-for="(item, index) in list" :key="'list_' + index" :label="index">
+        <span>{{index}}</span>
+        <!-- <span class="asd">999</span> -->
+        <span class="point" :class="active2 === index ? 'active' : 'none'">{{item}}</span>
+      </el-radio-button>
+    </el-radio-group>
+
+    <slot name="otherBtn"></slot>
+
+  </div>
 </template>
 
 <script>
@@ -40,6 +46,12 @@ export default {
 </script>
 
 <style scoped>
+.tobTabBox {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex: 1;
+}
 .topTab {
   margin-bottom: -1px;
 }

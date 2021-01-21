@@ -61,7 +61,7 @@
 
     <!-- 分页 -->
     <div class="paginationBox">
-      <el-pagination class="comPagination" :page-size="pageObj[active].size" :page-sizes="[10, 20, 30]" :total="pageObj[active].count" :current-page="pageObj[active].page"
+      <el-pagination class="comPagination" :page-size="pageObj[active].size" :page-sizes="[3, 10, 20, 30]" :total="pageObj[active].count" :current-page="pageObj[active].page"
         layout="prev, pager, next, total, jumper, sizes" prev-text="上一页" next-text="下一页"
         @size-change="handleSizeChange" @current-change="handleCurrentChange"
       >
@@ -85,8 +85,8 @@ export default {
       tabs: { '大货项目': '0', '开发项目': '0' }, // 三个页签 && 默认数量
       pageObj: { //                                          三个页签：对应的分页数据
         /* 总条数 每页数量 当前页数 */
-        '大货项目': { count: 0, size: 10, page: 1 },
-        '开发项目': { count: 0, size: 10, page: 1 }
+        '大货项目': { count: 0, size: 3, page: 1 },
+        '开发项目': { count: 0, size: 3, page: 1 }
       },
       listObj: { '大货项目': [], '开发项目': [] }, // 三个页签：对应的数据列表
       search: { //                                           三个页签：对应的搜索对象
@@ -256,6 +256,7 @@ export default {
     handleSizeChange(val) {
       const { pageObj, active } = this
       pageObj[active].size = val
+      pageObj[active].page = 1
       this.A_getSampleConfirmRecordList(active, true)
     },
     /**
@@ -273,7 +274,7 @@ export default {
       const { pageObj, listObj, search, nodeMapList, tabs } = this
       /* 重置 */
       for (const x in pageObj) {
-        pageObj[x] = { count: 0, size: 10, page: 1 }
+        pageObj[x] = { count: 0, size: 3, page: 1 }
       }
       for (const x in listObj) {
         listObj[x] = []

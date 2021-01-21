@@ -28,9 +28,9 @@
 
     <div class="pageLine">
       <!-- 日程记录 -->
-      <com-day class="task"></com-day>
+      <com-day class="richeng"></com-day>
       <!-- 本周待办 -->
-      <com-week class="news"></com-week>
+      <com-week class="benzhou"></com-week>
     </div>
 
   </div>
@@ -118,7 +118,21 @@ export default {
 
 /*** 消息中心 ***/
 .news {
-  width: 70%;
+  max-width: 590px;
+  flex: 1;
+}
+
+/*** 日程记录 ***/
+.richeng {
+  max-width: calc((100% - 13px) * 0.5);
+  margin-right: 13px;
+  flex: 1;
+}
+
+/*** 本周待办 ***/
+.benzhou {
+  max-width: calc((100% - 13px) * 0.5);
+  flex: 1;
 }
 </style>
 
@@ -174,12 +188,25 @@ th > .cell, th > .cell .thText {
 
 /*** 分页 ***/
 .comPagination {
-  padding: 0;
+  padding: 0 !important;
 }
-.comPagination > .el-pagination__sizes { /* 总条数 */
-  margin: 0 0 0 30px;
+.comPagination > .el-pagination__total {
+  margin-right: 0 !important;
+}
+.comPagination > .btn-prev { /* 上一页 */
+  padding-right: 0 !important;
+}
+.comPagination > .el-pager > li { /* 页数 */
+  min-width: 30px !important;
+  padding: 0 !important;
+}
+.comPagination > .btn-next { /* 下一页 */
+  padding-left: 0 !important;
+}
+.comPagination > .el-pagination__sizes, .comPagination > .el-pagination__jump { /* 前往5页，5条/页 */
+  margin: 0 0 0 10px !important;
 }
 .comPagination > .el-pagination__sizes > .el-select > .el-input--suffix { /* 总条数 */
-  margin-right: 0;
+  margin-right: 0 !important;
 }
 </style>

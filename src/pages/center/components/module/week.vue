@@ -15,7 +15,7 @@
 
     <div class="contentBox">
       <div class="li" v-for="(item, index) in list" :key="'list_' + index">
-        <div class="liNum">
+        <div class="liNum" style="cursor: pointer;" @click="goTo(item.item_type)">
           <span>{{item.num}}</span>
           <span class="liNumText">待办</span>
         </div>
@@ -52,7 +52,20 @@ export default {
       // eslint-disable-next-line
       ui("open", {
         title: '待办中心',
-        url: host + 'pages/itemnode/itemNodeNeedlist.jsp',
+        url: host + 'pages/itemnode/itemNodeNeedMenulist.jsp',
+        onClose: function () {}
+      })
+    },
+    /**
+     * [跳转：单条待办]
+     */
+    goTo(item_type) {
+      const text = { kf: '开发待办业务列表', ml: '面料待办业务列表', dh: '大货待办业务列表' }
+      const host = window.location.origin + '/nova/'
+      // eslint-disable-next-line
+      ui("open", {
+        title: text[item_type],
+        url: host + 'pages/itemnode/itemNodeNeedMenulist.jsp?type=' + item_type,
         onClose: function () {}
       })
     },
@@ -83,9 +96,12 @@ export default {
         /* 组装：单条数据 */
         for (let i = 0; i < res.length; i++) {
           const obj = {}
-          const item = res[i]
-          obj.num = item.itemInfo.needsize //   待办数量
-          obj.name = item.itemInfo.item_name // 待办事件名称
+          const item = res[i] || {}
+          const { itemInfo = {} } = item
+          const { needsize, item_name, item_type } = itemInfo
+          obj.num = needsize //   待办数量
+          obj.name = item_name // 待办事件名称
+          obj.item_type = item_type
           const strArr = []
           /* 组装：结点 */
           for (let j = 0; j < item.itemNode.length; j++) {

@@ -72,7 +72,7 @@
       </el-table-column>
       <!-- 五 -->
       <!-- width="160" -->
-      <el-table-column fixed="right" label="操作" width="120" align="center">
+      <el-table-column fixed="right" label="操作" width="70" align="center">
         <template slot="header" slot-scope="scope">
           <div class="thText" slot="reference" style="flex: 1;">操作</div>
         </template>
@@ -84,10 +84,10 @@
             已处理
           </el-button> -->
           <el-button class="newsBtn" type="primary" size="mini" v-if="scope.row.is_reply === 0" @click="A_showAdd_1(scope.row.index)">
-            回复消息
+            回复
           </el-button>
           <el-button class="newsBtn" type="primary" size="mini" v-else-if="scope.row.is_reply === 1" @click="A_showAdd_2(scope.row.index)">
-            查看回复
+            查看
           </el-button>
         </template>
       </el-table-column>
@@ -96,7 +96,7 @@
     <!-- 分页 -->
     <div class="paginationBox">
       <el-pagination class="comPagination" :page-size="pageObj[active].size" :page-sizes="[5, 10, 20, 30]" :total="pageObj[active].count" :current-page="pageObj[active].page"
-        layout="prev, pager, next, total, jumper, sizes" prev-text="上一页" next-text="下一页"
+        layout="prev, pager, next, total, jumper, sizes" prev-text="上一页" next-text="下一页" :pager-count="5"
         @size-change="handleSizeChange" @current-change="handleCurrentChange"
       >
       </el-pagination>
@@ -289,6 +289,7 @@ export default {
         page //                                             每页条数
       }
       const suc = function (res) {
+        // localStorage.setItem('消息中心', JSON.stringify(res))
         /* 加载中...：关闭 */
         if (show) {
           that.loading = false
@@ -356,6 +357,7 @@ export default {
     handleSizeChange(val) {
       const { pageObj, active } = this
       pageObj[active].size = val
+      pageObj[active].page = 1
       this.A_getMsgList(active, true)
     },
     /**

@@ -20,7 +20,11 @@
         <template slot-scope="scope">
           <p class="itemBtn" @click="A_showAdd_1(scope.row.index)">查看物料清单</p>
           <p class="itemBtn" @click="A_showAdd_2(scope.row.index)">查看物料单耗变更记录</p>
-          <p class="itemBtn" @click="A_showAdd_3(scope.row.index)">核算单耗</p>
+          <p>
+            <span class="itemBtn" @click="A_showAdd_3(scope.row.index)">核算单耗</span>
+            <span> | </span>
+            <span class="itemBtn" @click="A_showAdd_3(scope.row.index, '&dlhs=1')">订料单耗核算</span>
+          </p>
         </template>
       </el-table-column>
       <!-- 二 -->
@@ -89,7 +93,7 @@
 
     <!-- 分页 -->
     <div class="paginationBox">
-      <el-pagination class="comPagination" :page-size="pageObj[active].size" :page-sizes="[10, 20, 30]" :total="pageObj[active].count" :current-page="pageObj[active].page"
+      <el-pagination class="comPagination" :page-size="pageObj[active].size" :page-sizes="[3, 10, 20, 30]" :total="pageObj[active].count" :current-page="pageObj[active].page"
         layout="prev, pager, next, total, jumper, sizes" prev-text="上一页" next-text="下一页"
         @size-change="handleSizeChange" @current-change="handleCurrentChange"
       >
@@ -112,8 +116,8 @@ export default {
       tabs: { '大货项目': '0', '开发项目': '0' }, //      页签 && 默认数量
       pageObj: { //                                    页签：对应的分页数据
         /* 总条数 每页数量 当前页数 */
-        '大货项目': { count: 0, size: 10, page: 1 },
-        '开发项目': { count: 0, size: 10, page: 1 }
+        '大货项目': { count: 0, size: 3, page: 1 },
+        '开发项目': { count: 0, size: 3, page: 1 }
       },
       listObj: { '大货项目': [], '开发项目': [] }, //     页签：对应的数据列表
       search: { //                                     页签：对应的搜索对象
@@ -183,9 +187,10 @@ export default {
     },
     /**
      * [请求：核算单耗]
-     * @param {[Int]} index 表格数据索引
+     * @param {[Int]}    index      表格数据索引
+     * @param {[String]} otherParam 其他参数
      */
-    A_showAdd_3(index) {
+    A_showAdd_3(index, otherParam) {
       const that = this
       const host = window.location.origin + '/nova/'
       const { listObj, active, tabType } = that
@@ -202,7 +207,7 @@ export default {
           // eslint-disable-next-line
           updateWin({
             title: '技术单耗核算',
-            url: host + 'unitConsumptionAccountShowAction.ndo?action=showAdd',
+            url: host + 'unitConsumptionAccountShowAction.ndo?action=showAdd' + otherParam,
             width: 1800,
             height: 1000,
             param,
@@ -354,6 +359,7 @@ export default {
     handleSizeChange(val) {
       const { pageObj, active } = this
       pageObj[active].size = val
+      pageObj[active].page = 1
       this.A_getUnitConsumPtion(active, true)
     },
     /**
@@ -371,7 +377,7 @@ export default {
       const { pageObj, listObj, search, nodeMapList, tabs } = this
       /* 重置 */
       for (const x in pageObj) {
-        pageObj[x] = { count: 0, size: 10, page: 1 }
+        pageObj[x] = { count: 0, size: 3, page: 1 }
       }
       for (const x in listObj) {
         listObj[x] = []

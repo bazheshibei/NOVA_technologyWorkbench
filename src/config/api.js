@@ -5,13 +5,16 @@ import Axios from '@/config/axios'
 /**
  * [服务器地址]
  */
-// const host = '/api/'
+// const host = '/api_d/'
+// const host = '/api_83/'
 const host = window.location.origin + '/nova/'
 
 /**
  * [接口地址]
  */
 const url = {
+  '工作台任务列表': 'taskBusinessDetailAction.ndo?action=detailList',
+  '修改状态': 'taskBusinessDetailAction.ndo?action=updateLevel',
   '权限': 'unitConsumptionAccountShowAction.ndo?action=getWorkbenchResources',
   '待办已办业务列表': 'itemInfoAction.ndo?action=needToBeDealtWithNode',
   '消息中心': 'msgInfoShowAction.ndo?action=getMsgList',

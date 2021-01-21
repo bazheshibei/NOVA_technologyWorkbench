@@ -1,6 +1,7 @@
 
 // 发送请求
 import Axios from 'axios'
+import Qs from 'qs'
 import { Loading } from 'element-ui'
 // import { MessageBox, Loading } from 'element-ui'
 
@@ -46,7 +47,7 @@ const HTTP = function (param) {
     loadingInstance = Loading.service({ text: loading })
   }
   /* 发起请求 */
-  Axios({ method, url, data })
+  Axios({ method, url, data: Qs.stringify(data) })
     .then(function (res) {
       suc(res.data.data)
       // if (res.data.code === '200') {
