@@ -20,12 +20,20 @@ module.exports = {
           '^/api_d': ''
         }
       },
-      '/api_83': {
-        target: 'http://192.168.9.130:8083/nova',
+      '/api_z': {
+        target: 'http://192.168.8.139:8083/nova', // 孜祎
         secure: false, // proxy https
         changeOrigin: true,
         pathRewrite: {
-          '^/api_83': ''
+          '^/api_z': ''
+        }
+      },
+      '/api_f': {
+        target: 'http://47.105.94.214:8080/nova', // 服务器
+        secure: false, // proxy https
+        changeOrigin: true,
+        pathRewrite: {
+          '^/api_f': ''
         }
       }
     },

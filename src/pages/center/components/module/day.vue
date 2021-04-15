@@ -10,28 +10,41 @@
     <div class="contentBox">
       <span style="display: none;">{{toggleMonth}}</span>
 
+      <!-- 左侧日历 -->
       <div class="leftBox">
         <el-calendar class="comCalendar" :first-day-of-week="7" ref="asd">
           <template slot="dateCell" slot-scope="{date, data}">
             <div class="day" :class="data.isSelected ? 'is-selected' : ''" @click="chooseDay(data.day)">
               {{ data.day.split('-')[2] }}
-              <!-- <span class="point" v-if="timeArr.includes(data.day)"></span> -->
               <span class="point" v-if="arrIncludes(data.day, timeArr)"></span>
             </div>
           </template>
         </el-calendar>
       </div>
 
-      <div class="rightBox" v-show="list[today] && list[today].length">
-        <p>{{today}} 日程规划</p>
-        <ul class="listUl">
-          <li class="listLi" v-for="(item, index) in list[today]" :key="'list_' + index">
-            <p>{{item.time}}</p>
-            <p>{{item.title}}</p>
-            <p>{{item.content}}</p>
-          </li>
-        </ul>
-        <div class="triangle"></div>
+      <!-- 右侧文字 -->
+      <div class="rightBox">
+        <!-- 选择人员 -->
+        <div class="choicePeopleBox">
+          <el-select v-if="peopleList.length" class="choicePeopleSelect" clearable size="mini" filterable placeholder="请选择要查看的人员姓名"
+            :filter-method="selectInput"
+            v-model="peopleId" @change="choicePeople"
+          >
+            <el-option v-for="(item, index) in optionList" :key="'people_' + index" :label="item.employeename" :value="item.employeeid"></el-option>
+          </el-select>
+        </div>
+        <!-- 日程列表 -->
+        <div class="listBox" v-show="list[today] && list[today].length">
+          <p>{{today}} 日程规划</p>
+          <ul class="listUl">
+            <li class="listLi" v-for="(item, index) in list[today]" :key="'list_' + index">
+              <p>{{item.time}}</p>
+              <p>{{item.title}}</p>
+              <p>{{item.content}}</p>
+            </li>
+          </ul>
+          <div class="triangle"></div>
+        </div>
       </div>
 
     </div>
@@ -42,24 +55,28 @@
 <script>
 import Api from '@/config/api'
 import ComWhiteBox from '../whiteBox' // 白色容器
+// import LocalData from '@/localData/data.js'
 export default {
   components: { ComWhiteBox },
   data() {
     return {
       loading: false,
       status: false,
-      starttime: '', // 本月：第一天
-      endtime: '', //   本月：最后一天
-      today: '', //     本月：今天
-      timeArr: [], //   日期数组：用于标记是否有日程
-      list: {}
+      starttime: '', //  本月：第一天
+      endtime: '', //    本月：最后一天
+      today: '', //      本月：今天
+      timeArr: [], //    日期数组：用于标记是否有日程
+      list: {},
+      peopleList: [], // 人员列表
+      optionList: [], // 筛选后的人员列表
+      peopleId: '' //    选中的人员信息
     }
   },
   created() {
     const d = new Date()
     const nowYear = d.getFullYear() //                                当前年份
     const nowMonth = d.getMonth() //                                  当前月份：3月 => 索引值 2
-    const nowDay = d.getDate() //                                     当前日
+    // const nowDay = d.getDate() //                                     当前日
     const next = new Date(nowYear, nowMonth + 1, 1).getTime() //      下月一号的毫秒值
     const lastDay = new Date(next - 1000 * 60 * 60 * 24).getDate() // 本月最后一天
     /* 设置本月起始日期 */
@@ -67,11 +84,56 @@ export default {
     const strLastDay = String(lastDay).length === 1 ? '0' + lastDay : lastDay
     this.starttime = `${nowYear}-${strMonth}-01` //          本月：第一天
     this.endtime = `${nowYear}-${strMonth}-${strLastDay}` // 本月：最后一天
-    this.today = `${nowYear}-${strMonth}-${nowDay}` //       本月：今天
+    this.today = `${nowYear}-${strMonth}` //                 本月
     /** 请求：本月日程 **/
     this.thisMonth()
+    /** 请求：日程人员 **/
+    this.A_searchEmployee()
   },
   methods: {
+    /**
+     * [搜索筛选]
+     * @param  {[String]} text 关键字
+     * @return {[type]}      [description]
+     */
+    selectInput(text) {
+      if (text) {
+        const { peopleList = [] } = this
+        const arr = []
+        peopleList.forEach(item => {
+          if (item.employeename.indexOf(text) > -1) {
+            arr.push(item)
+          }
+        })
+        this.optionList = arr
+      } else {
+        this.optionList = []
+      }
+    },
+    /**
+     * [请求：日程人员]
+     */
+    A_searchEmployee() {
+      // const res = JSON.parse(localStorage.getItem('日程人员') || '{}')
+      // console.log('日程人员 ----- ', res)
+      // this.peopleList = res || []
+      //
+      // const res = [
+      //   { employeeid: 'f4ec68c5e0544e37be5aba11f6fa9ba2', employeename: 'aaaa' },
+      //   { employeeid: 'f4ec68c5e0544e37be5aba11f6fa9ba2', employeename: 'a2222' }
+      // ]
+      // this.peopleList = res || []
+      //
+      const that = this
+      const name = '日程人员'
+      const obj = {}
+      const suc = function (res) {
+        // localStorage.setItem('日程人员', JSON.stringify(res))
+        // console.log('日程人员 ----- ', res)
+        that.peopleList = res || []
+      }
+      Api({ name, obj, suc })
+    },
     /**
      * [请求：本月日程]
      */
@@ -79,33 +141,48 @@ export default {
       /* 加载中...：显示 */
       this.loading = show
       const that = this
-      const { starttime, endtime } = that
+      const { today } = this
+      // const { starttime, endtime } = that // 测试用  peopleId = '26c4ff33f8774d93bff52d13166f08ab'
+      const { starttime, endtime, peopleId = '' } = that
       /* 请求 */
       const name = '日程列表'
-      const obj = {
-        userid: '',
-        // userid: '965BAD8F4EF5C14CE4F607E77D30B9B5', // 测试用
-        starttime,
-        endtime,
-        type: 1 // 正式用
-      }
+      // const obj = { userid: '26c4ff33f8774d93bff52d13166f08ab', starttime, endtime, type: 1 } // 测试用
+      const obj = { userid: peopleId, starttime, endtime, type: 1 }
       const suc = function (res) {
+        // localStorage.setItem('日程列表', JSON.stringify(res))
+        // console.log('日程列表 ----- ', res)
         /* 加载中...：关闭 */
         if (show) {
           that.loading = false
         }
-        const timeArr = [] // 日期数组
-        const list = {} //    日期作为索引的列表
+        const timeArr = [] //  日期数组
+        const list = {} //     日期作为索引的列表
+        let list_month = [] // 本月日程
         for (let i = 0; i < res.length; i++) {
           const item = res[i]
           timeArr.push(item.date)
           list[item.date] = item.data
+          if (today.length === 7) {
+            list_month = list_month.concat(item.data)
+          }
+        }
+        if (today.length === 7) {
+          list[today] = list_month
         }
         that.timeArr = timeArr
         that.list = list
         that.status = true
       }
       Api({ name, obj, suc })
+    },
+    /**
+     * [选中人员]
+     * @param {[String]} event 人员ID
+     */
+    choicePeople(event) {
+      this.peopleId = event
+      /** 请求：本月日程 **/
+      this.thisMonth(true)
     },
     /**
      * [选中日期]
@@ -115,7 +192,9 @@ export default {
       const { today } = that
       that.today = day
       /* 切换到其他月份 */
-      if (today.slice(0, -3) !== day.slice(0, -3)) {
+      const todayStr = today.length === 7 ? today : today.slice(0, -3)
+      const dayStr = day.length === 7 ? day : day.slice(0, -3)
+      if (todayStr !== dayStr) {
         const arr = day.split('-')
         const nowYear = arr[0] //                当前年份
         const nowMonth = parseInt(arr[1]) - 1 // 当前月份：3月 => 索引值 2
@@ -157,7 +236,7 @@ export default {
       const d = new Date()
       const nowYear = d.getFullYear() //                                当前年份
       const nowMonth = d.getMonth() //                                  当前月份：3月 => 索引值 2
-      const nowDay = d.getDate() //                                     当前日
+      // const nowDay = d.getDate() //                                     当前日
       const next = new Date(nowYear, nowMonth + 1, 1).getTime() //      下月一号的毫秒值
       const lastDay = new Date(next - 1000 * 60 * 60 * 24).getDate() // 本月最后一天
       /* 设置本月起始日期 */
@@ -165,7 +244,7 @@ export default {
       const strLastDay = String(lastDay).length === 1 ? '0' + lastDay : lastDay
       this.starttime = `${nowYear}-${strMonth}-01` //          本月：第一天
       this.endtime = `${nowYear}-${strMonth}-${strLastDay}` // 本月：最后一天
-      this.today = `${nowYear}-${strMonth}-${nowDay}` //       本月：今天
+      this.today = `${nowYear}-${strMonth}` //                 本月
       /** 请求：本月日程 **/
       this.thisMonth(true)
     }
@@ -201,8 +280,20 @@ export default {
   width: 50%;
 }
 .rightBox { /* 右侧容器 */
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.choicePeopleBox { /* 选择人员容器 */
+  min-height: 52px;
+  max-height: 52px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  flex: 1
+}
+.listBox { /* 日程列表容器 */
   font-size: 12px;
-  margin: 52px 0 0 0px;
   padding: 20px;
   background: #ecf2fe;
   border-radius: 6px;
@@ -274,5 +365,10 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.choicePeopleSelect {
+  width: 200px !important;
+  padding-bottom: 12px !important;
 }
 </style>

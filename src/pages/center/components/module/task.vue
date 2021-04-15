@@ -3,7 +3,6 @@
 <template>
   <com-white-box :title="'任务中心'" v-loading="loading">
 
-    <!-- updateWin 打开最后一格 -->
     <template slot="f5">
       <i class="el-icon-refresh f5" @click="f5"></i>
     </template>
@@ -51,7 +50,15 @@
         </template>
       </el-table-column> -->
       <!-- 二 -->
-      <el-table-column label="任务内容" align="center">
+      <el-table-column align="center">
+        <template slot="header" slot-scope="scope">
+          <el-popover placement="top" width="250" trigger="click">
+            <el-input ref="input_2" v-model="search[active].task_content" clearable placeholder="多个查询空格分隔" @clear="clear('task_content')" @change="select"></el-input>
+            <div class="thText" :class="search[active].task_content ? 'thActive' : ''" slot="reference" style="flex: 1;" @click="tableHeaderClick('input_2')">
+              任务内容<span>&nbsp;<i class="el-icon-search"></i></span>
+            </div>
+          </el-popover>
+        </template>
         <template slot-scope="scope">
           <span class="hover" @click="goComplete(scope.row)">{{scope.row.task_content}}</span>
         </template>
@@ -85,7 +92,11 @@
       <!-- 七 -->
       <el-table-column label="操作" width="50" align="center">
         <template slot-scope="scope">
-          <span class="hover click" @click="goTo(scope.row)">跟进</span>
+          <el-popconfirm v-if="active === '公共任务' && String(scope.row.flag) === '0'" title="确定要参与吗？" @confirm="join(scope.row)">
+            <span slot="reference" class="hover click">参与</span>
+          </el-popconfirm>
+          <span v-else-if="String(scope.row.curr_status) === '3' || String(scope.row.curr_status) === '4'" class="hover click"></span>
+          <span v-else-if="String(scope.row.curr_status) === '1' || String(scope.row.curr_status) === '2'" class="hover click" @click="goTo(scope.row)">跟进</span>
         </template>
       </el-table-column>
     </el-table>
@@ -133,6 +144,12 @@ export default {
       },
       backgroundColor: { '1': '#409EFF', '2': '#67C23A', '3': '#F56C6C', '4': '#E6A23C', '5': '#909399' },
       listObj: { '预警': [], '今日待办': [], '公共任务': [], '全部': [] }, //    三个页签：对应的数据列表
+      search: { //                                           三个页签：对应的搜索对象
+        '预警': { task_content: '' },
+        '今日待办': { task_content: '' },
+        '公共任务': { task_content: '' },
+        '全部': { task_content: '' }
+      },
       active: '预警', //                                                     当前激活的页签
       tabType: { '预警': '1', '今日待办': '2', '公共任务': '4', '全部': '' } // 请求时，页签对应的值
     }
@@ -185,17 +202,31 @@ export default {
       }
     },
     /**
+     * [点击参与]
+     */
+    join(row) {
+      const that = this
+      const { task_detail_id } = row
+      /* 发起请求 */
+      const name = '参与'
+      const obj = { task_detail_id }
+      const suc = function (res) {
+        that.f5(false)
+      }
+      Api({ name, obj, suc })
+    },
+    /**
      * [点击跟进]
      */
     goTo(row) {
       const that = this
       const host = window.location.origin + '/nova/'
-      const { task_detail_id } = row
+      const { task_detail_id, task_summary_id } = row
       /* 发起请求 */
       // eslint-disable-next-line
       updateWin({
         url: host + 'taskBusinessProgressShowAction.ndo?action=showAdd',
-        param: { taskid: task_detail_id, empid: '965BAD8F4EF5C14CE4F607E77D30B9B5' },
+        param: { taskid: task_detail_id, empid: '', task_summary_id }, // empid: '965BAD8F4EF5C14CE4F607E77D30B9B5'
         width: 1600,
         height: 7000,
         title: '录入任务进展',
@@ -214,10 +245,18 @@ export default {
       // const page = parseInt(pageObj[tab].page) - 1
       // const num = pageObj[tab].size
       // const res = LocalData['任务中心']
+      // console.log('res ----- ', res)
       // if (res.data.length) {
       //   /* ----- 有数据 ----- */
       //   /* tab 数字标记 */
-      //   that.tabs[tab] = parseInt(res.nums)
+      //   // const { tabs } = that
+      //   // tabs[tab] = parseInt(res.nums)
+      //   // that.tabs = Object.assign({}, tabs)
+      //   if (show) {
+      //     that.tabs[tab] = 999
+      //   } else {
+      //     that.tabs[tab] = parseInt(res.nums)
+      //   }
       //   /* 分页数据 */
       //   const pageObj = {
       //     count: parseInt(res.nums),
@@ -243,14 +282,16 @@ export default {
       /* 加载中...：显示 */
       this.loading = show
       const that = this
-      const { tabType, pageObj } = this
+      const { tabType, search = {}, pageObj } = this
+      /* 整理搜索对象 */
+      const { task_content = '' } = search[tab]
       /* 整理分页对象 */
       const page = parseInt(pageObj[tab].page) - 1
       const num = pageObj[tab].size
       /* 发起请求 */
       const name = '工作台任务列表'
-      const obj = { type: tabType[tab], emp_id: '', page, num } // { 页签, 当前登录用户的ID, 页码, 每页条数 }
-      // const obj = { type: tabType[tab], emp_id: '965BAD8F4EF5C14CE4F607E77D30B9B5', page, num } // { 页签, 当前登录用户的ID, 页码, 每页条数 }
+      const obj = { type: tabType[tab], task_content, emp_id: '', page, num } // { 页签, 当前登录用户的ID, 页码, 每页条数 }
+      // const obj = { type: tabType[tab], task_content, emp_id: '965BAD8F4EF5C14CE4F607E77D30B9B5', page, num } // { 页签, 当前登录用户的ID, 页码, 每页条数 }
       const suc = function (res) {
         // localStorage.setItem('任务中心', JSON.stringify(res))
         // console.log('res ----- ', res)
@@ -258,10 +299,10 @@ export default {
         if (show) {
           that.loading = false
         }
+        /* tab 数字标记 */
+        that.tabs[tab] = parseInt(res.nums)
         if (res.data.length) {
           /* ----- 有数据 ----- */
-          /* tab 数字标记 */
-          that.tabs[tab] = parseInt(res.nums)
           /* 分页数据 */
           const pageObj = {
             count: parseInt(res.nums),
@@ -276,6 +317,7 @@ export default {
           that.listObj[tab] = res.data || []
         } else {
           /* ----- 没数据 ----- */
+          that.listObj[tab] = []
           const num = parseInt(pageObj[tab].page)
           if (num > 1) {
             that.pageObj[tab].page = num - 1
@@ -331,11 +373,37 @@ export default {
       this.A_detailList(active, true)
     },
     /**
+     * [点击表头，input自动聚焦]
+     * @param {[Int]} index 索引
+     */
+    tableHeaderClick(index) {
+      const that = this
+      setTimeout(function () {
+        that.$refs[index].focus()
+      }, 100)
+    },
+    /**
      * [切换分页]
      */
     handleCurrentChange(val) {
       const { pageObj, active } = this
       pageObj[active].page = val
+      this.A_detailList(active, true)
+    },
+    /**
+     * [清空输入框]
+     * @param {[String]} name 字段名
+     */
+    clear(name) {
+      const { active } = this
+      this.search[active][name] = ''
+    },
+    /**
+     * [搜索]
+     */
+    select() {
+      const { pageObj, active } = this
+      pageObj[active].page = 1
       this.A_detailList(active, true)
     },
     /**
@@ -399,5 +467,10 @@ export default {
 }
 .el-dropdown-menu__item, .el-dropdown-menu__item.is-disabled {
   color: #ffffff !important;
+}
+
+.el-popover > .el-popconfirm > .el-popconfirm__action > .el-button { /* 删除悬浮框：取消、确定按钮 */
+  margin-left: 6px !important;
+  padding: 2px 5px !important;
 }
 </style>

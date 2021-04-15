@@ -267,7 +267,7 @@ export default {
                   item['timeColor_' + id] = '#67C23A'
                 } else if (item['is_complete_' + id] === '2') {
                   item['timeText_' + id] = '超期完成'
-                  item['timeColor_' + id] = '#E6A23C'
+                  item['timeColor_' + id] = '#2028E3'
                 } else {
                   const timeArr = item['plan_enddate_' + id].split('-')
                   const end = new Date(timeArr[0], parseInt(timeArr[1]) - 1, timeArr[2]).getTime()

@@ -190,7 +190,7 @@ export default {
      * @param {[Int]}    index      表格数据索引
      * @param {[String]} otherParam 其他参数
      */
-    A_showAdd_3(index, otherParam) {
+    A_showAdd_3(index, otherParam = '') {
       const that = this
       const host = window.location.origin + '/nova/'
       const { listObj, active, tabType } = that
@@ -298,7 +298,7 @@ export default {
                 val.timeColor = '#67C23A'
               } else if (val.is_complete === 2) {
                 val.timeText = '超期完成'
-                val.timeColor = '#E6A23C'
+                val.timeColor = '#2028E3'
               } else {
                 const timeArr = val.plan_enddate.split('-')
                 const end = new Date(timeArr[0], parseInt(timeArr[1]) - 1, timeArr[2]).getTime()
